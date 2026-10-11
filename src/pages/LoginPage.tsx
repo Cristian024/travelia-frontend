@@ -60,21 +60,36 @@ export function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary/10 via-background to-background p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-2 text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/15">
-            <Compass className="h-6 w-6 text-primary" />
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background p-4 py-12">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -top-48 left-1/2 h-[40rem] w-[40rem] -translate-x-1/2 rounded-full bg-primary/12 blur-[130px]"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -bottom-40 -right-24 h-[28rem] w-[28rem] rounded-full bg-sky-400/12 blur-[130px]"
+      />
+
+      <Card className="animate-scale-in relative w-full max-w-md border-border/60 shadow-apple-xl">
+        <CardHeader className="space-y-3 text-center">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-b from-primary to-primary/85 text-primary-foreground shadow-apple-sm">
+            <Compass className="h-7 w-7" />
           </div>
-          <CardTitle>Bienvenido a Travelia</CardTitle>
-          <CardDescription>
-            Inicia sesión para planificar tu próximo viaje
-          </CardDescription>
+          <div className="space-y-1.5">
+            <CardTitle className="text-[28px] leading-tight">
+              Bienvenido a Travelia
+            </CardTitle>
+            <CardDescription className="text-balance">
+              Inicia sesión para planificar tu próximo viaje
+            </CardDescription>
+          </div>
         </CardHeader>
         <form onSubmit={handleSubmit(onSubmit)}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Correo electrónico</Label>
+              <Label htmlFor="email" className="text-[13px] text-muted-foreground">
+                Correo electrónico
+              </Label>
               <Input
                 id="email"
                 type="email"
@@ -87,7 +102,12 @@ export function LoginPage() {
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Contraseña</Label>
+              <Label
+                htmlFor="password"
+                className="text-[13px] text-muted-foreground"
+              >
+                Contraseña
+              </Label>
               <Input
                 id="password"
                 type="password"
@@ -101,14 +121,22 @@ export function LoginPage() {
               )}
             </div>
           </CardContent>
-          <CardFooter className="flex flex-col gap-3">
-            <Button type="submit" className="w-full" disabled={loading}>
+          <CardFooter className="flex flex-col gap-4">
+            <Button
+              type="submit"
+              size="lg"
+              className="w-full text-[15px]"
+              disabled={loading}
+            >
               {loading && <Loader2 className="h-4 w-4 animate-spin" />}
               Iniciar sesión
             </Button>
             <p className="text-center text-sm text-muted-foreground">
               ¿No tienes cuenta?{" "}
-              <Link to="/register" className="font-medium text-primary hover:underline">
+              <Link
+                to="/register"
+                className="font-medium text-primary hover:underline"
+              >
                 Regístrate
               </Link>
             </p>

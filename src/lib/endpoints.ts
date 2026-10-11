@@ -75,6 +75,8 @@ export const itinerariesApi = {
     api
       .get<ItineraryResponse>(`/api/v1/itineraries/${itineraryId}`)
       .then((r) => r.data),
+  remove: (itineraryId: string) =>
+    api.delete(`/api/v1/itineraries/${itineraryId}`).then((r) => r.data),
   startReplacement: (itineraryId: string, destinationId: string) =>
     api
       .post<DestinationQuestionsResponse>(

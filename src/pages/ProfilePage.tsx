@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { Loader2, Save } from "lucide-react"
+import { CalendarDays, Loader2, Mail, Save } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -105,59 +105,82 @@ export function ProfilePage() {
 
   if (!user) return null
 
+  const initials = user.full_name
+    .split(" ")
+    .map((p) => p[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase()
+
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Mi perfil</h1>
-        <p className="text-muted-foreground">
+    <div className="mx-auto max-w-2xl space-y-8">
+      <div className="animate-fade-up space-y-1.5">
+        <h1 className="text-[30px] font-semibold leading-tight tracking-tight sm:text-[34px]">
+          Mi perfil
+        </h1>
+        <p className="text-[15px] text-muted-foreground">
           Revisa y actualiza tu información personal
         </p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-xl">Información de la cuenta</CardTitle>
-          <CardDescription>
-            Miembro desde {formatDate(user.created_at)}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-2 text-sm">
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Correo electrónico</span>
-            <span className="font-medium">{user.email}</span>
+      <Card className="animate-fade-up animate-delay-1">
+        <CardContent className="flex items-center gap-4 p-6 sm:p-7">
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-3xl bg-gradient-to-b from-primary to-primary/85 text-xl font-semibold text-primary-foreground shadow-apple-sm">
+            {initials}
           </div>
-          <Separator />
-          <p className="text-xs text-muted-foreground">
-            El correo no se puede modificar desde aquí.
-          </p>
+          <div className="min-w-0 space-y-1">
+            <div className="truncate text-lg font-semibold tracking-tight">
+              {user.full_name}
+            </div>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+              <span className="inline-flex items-center gap-1.5">
+                <Mail className="h-3.5 w-3.5" />
+                {user.email}
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <CalendarDays className="h-3.5 w-3.5" />
+                Miembro desde {formatDate(user.created_at)}
+              </span>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="animate-fade-up animate-delay-2">
+        <CardHeader>
+          <CardTitle className="text-xl">Datos personales</CardTitle>
+          <CardDescription>
+            Actualiza tu información cuando quieras. El correo no se puede
+            modificar desde aquí.
+          </CardDescription>
+        </CardHeader>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <CardHeader>
-            <CardTitle className="text-xl">Datos personales</CardTitle>
-            <CardDescription>
-              Actualiza tu información cuando quieras
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-4 sm:grid-cols-2">
+          <CardContent className="grid gap-5 sm:grid-cols-2">
             <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor="full_name">Nombre completo</Label>
+              <Label htmlFor="full_name" className="text-[13px] text-muted-foreground">
+                Nombre completo
+              </Label>
               <Input id="full_name" {...register("full_name")} />
               {errors.full_name && (
                 <p className="text-xs text-destructive">{errors.full_name.message}</p>
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="birth_date">Fecha de nacimiento</Label>
+              <Label htmlFor="birth_date" className="text-[13px] text-muted-foreground">
+                Fecha de nacimiento
+              </Label>
               <Input id="birth_date" type="date" {...register("birth_date")} />
               {errors.birth_date && (
                 <p className="text-xs text-destructive">{errors.birth_date.message}</p>
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="country_of_residence">País de residencia</Label>
+              <Label
+                htmlFor="country_of_residence"
+                className="text-[13px] text-muted-foreground"
+              >
+                País de residencia
+              </Label>
               <Input
                 id="country_of_residence"
                 {...register("country_of_residence")}
@@ -169,11 +192,15 @@ export function ProfilePage() {
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="phone">Teléfono</Label>
+              <Label htmlFor="phone" className="text-[13px] text-muted-foreground">
+                Teléfono
+              </Label>
               <Input id="phone" {...register("phone")} />
             </div>
             <div className="space-y-2">
-              <Label>Idioma preferido</Label>
+              <Label className="text-[13px] text-muted-foreground">
+                Idioma preferido
+              </Label>
               <Select
                 value={language}
                 onValueChange={(v) =>
@@ -196,11 +223,11 @@ export function ProfilePage() {
               <p className="text-sm text-destructive sm:col-span-2">{serverError}</p>
             )}
           </CardContent>
-          <CardFooter>
+          <Separator />
+          <CardFooter className="justify-end pt-6">
             <Button
               type="submit"
               disabled={!isDirty || mutation.isPending}
-              className="ml-auto"
             >
               {mutation.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

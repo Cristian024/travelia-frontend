@@ -27,13 +27,18 @@ export function DynamicQuestions({ questions, value, onChange }: Props) {
 
   return (
     <div className="space-y-6">
-      {questions.map((q) => (
-        <QuestionField
+      {questions.map((q, i) => (
+        <div
           key={q.question_id}
-          question={q}
-          value={value[q.question_id]}
-          onChange={(v) => set(q.question_id, v)}
-        />
+          className="animate-fade-up space-y-2.5"
+          style={{ animationDelay: `${Math.min(i, 6) * 60}ms` }}
+        >
+          <QuestionField
+            question={q}
+            value={value[q.question_id]}
+            onChange={(v) => set(q.question_id, v)}
+          />
+        </div>
       ))}
     </div>
   )
@@ -93,10 +98,13 @@ function QuestionField({
         <RadioGroup
           value={(value as string) ?? ""}
           onValueChange={onChange}
-          className="gap-2"
+          className="gap-2.5"
         >
           {options.map((opt) => (
-            <div key={opt} className="flex items-center gap-2 rounded-md border border-input p-3 hover:bg-accent">
+            <div
+              key={opt}
+              className="flex items-center gap-3 rounded-2xl border border-border/70 bg-card p-4 transition-all duration-200 ease-apple hover:border-primary/40 hover:bg-secondary/40 has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/5"
+            >
               <RadioGroupItem value={opt} id={`${question_id}-${opt}`} />
               <Label
                 htmlFor={`${question_id}-${opt}`}
@@ -137,24 +145,23 @@ function MultipleChoiceField({
     onChange(next)
   }
   return (
-    <div className="grid gap-2">
+    <div className="grid gap-2.5">
       {options.map((opt) => {
         const id = `${qid}-${opt}`
         const checked = value.includes(opt)
         return (
-          <div
+          <label
             key={opt}
-            className="flex items-center gap-2 rounded-md border border-input p-3 hover:bg-accent"
+            htmlFor={id}
+            className="flex cursor-pointer items-center gap-3 rounded-2xl border border-border/70 bg-card p-4 transition-all duration-200 ease-apple hover:border-primary/40 hover:bg-secondary/40 has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/5"
           >
             <Checkbox
               id={id}
               checked={checked}
               onCheckedChange={(c) => toggle(opt, c === true)}
             />
-            <Label htmlFor={id} className="flex-1 cursor-pointer font-normal">
-              {opt}
-            </Label>
-          </div>
+            <span className="flex-1 text-sm">{opt}</span>
+          </label>
         )
       })}
     </div>
@@ -180,10 +187,10 @@ function ScaleField({
             setLocal(n)
             onChange(n)
           }}
-          className={`h-10 w-10 rounded-md border text-sm font-medium transition-colors ${
+          className={`h-11 w-11 rounded-xl border text-sm font-semibold transition-all duration-200 ease-apple active:scale-95 ${
             local === n
-              ? "border-primary bg-primary text-primary-foreground"
-              : "border-input hover:bg-accent"
+              ? "border-primary bg-primary text-primary-foreground shadow-apple-sm"
+              : "border-border bg-card text-foreground hover:border-primary/40 hover:bg-secondary"
           }`}
         >
           {n}

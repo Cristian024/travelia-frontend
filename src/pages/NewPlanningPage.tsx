@@ -138,34 +138,40 @@ export function NewPlanningPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
-      <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/15">
-          <Compass className="h-5 w-5 text-primary" />
+    <div className="mx-auto max-w-3xl space-y-8">
+      <div className="animate-fade-up flex items-start gap-4">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-b from-primary to-primary/85 text-primary-foreground shadow-apple-sm">
+          <Compass className="h-6 w-6" />
         </div>
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Nueva planificación</h1>
-          <p className="text-muted-foreground">
+        <div className="space-y-1">
+          <h1 className="text-[30px] font-semibold leading-tight tracking-tight sm:text-[34px]">
+            Nueva planificación
+          </h1>
+          <p className="text-[15px] text-muted-foreground">
             Comenzamos con algunas preguntas generales sobre tu viaje
           </p>
         </div>
       </div>
 
-      <Card>
+      <Card className="animate-fade-up animate-delay-1">
         <form onSubmit={handleSubmit(onSubmit)}>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-xl">
-              <Sparkles className="h-5 w-5 text-primary" />
+            <CardTitle className="flex items-center gap-2.5 text-xl">
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <Sparkles className="h-4 w-4" />
+              </span>
               Información general
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="pt-1">
               Con estos datos haremos preguntas dinámicas para personalizar tu
               itinerario.
             </CardDescription>
           </CardHeader>
-          <CardContent className="grid gap-4 sm:grid-cols-2">
+          <CardContent className="grid gap-5 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="destination_country">País de destino</Label>
+              <Label htmlFor="destination_country" className="text-[13px] text-muted-foreground">
+                País de destino
+              </Label>
               <Input
                 id="destination_country"
                 placeholder="Ej. Japón"
@@ -178,7 +184,9 @@ export function NewPlanningPage() {
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="destination_city">Ciudad (opcional)</Label>
+              <Label htmlFor="destination_city" className="text-[13px] text-muted-foreground">
+                Ciudad (opcional)
+              </Label>
               <Input
                 id="destination_city"
                 placeholder="Ej. Tokio"
@@ -186,14 +194,18 @@ export function NewPlanningPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="arrival_date">Fecha de llegada</Label>
+              <Label htmlFor="arrival_date" className="text-[13px] text-muted-foreground">
+                Fecha de llegada
+              </Label>
               <Input id="arrival_date" type="date" {...register("arrival_date")} />
               {errors.arrival_date && (
                 <p className="text-xs text-destructive">{errors.arrival_date.message}</p>
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="departure_date">Fecha de salida</Label>
+              <Label htmlFor="departure_date" className="text-[13px] text-muted-foreground">
+                Fecha de salida
+              </Label>
               <Input
                 id="departure_date"
                 type="date"
@@ -206,7 +218,9 @@ export function NewPlanningPage() {
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="number_of_travelers">Número de viajeros</Label>
+              <Label htmlFor="number_of_travelers" className="text-[13px] text-muted-foreground">
+                Número de viajeros
+              </Label>
               <Input
                 id="number_of_travelers"
                 type="number"
@@ -220,7 +234,7 @@ export function NewPlanningPage() {
               )}
             </div>
             <div className="space-y-2">
-              <Label>Presupuesto</Label>
+              <Label className="text-[13px] text-muted-foreground">Presupuesto</Label>
               <Select
                 value={budget}
                 onValueChange={(v) => setValue("budget_range", v as BudgetRange)}
@@ -243,7 +257,9 @@ export function NewPlanningPage() {
               </Select>
             </div>
             <div className="space-y-2 sm:col-span-2">
-              <Label>Propósito del viaje</Label>
+              <Label className="text-[13px] text-muted-foreground">
+                Propósito del viaje
+              </Label>
               <Select
                 value={purpose}
                 onValueChange={(v) => setValue("travel_purpose", v as TravelPurpose)}
@@ -260,7 +276,10 @@ export function NewPlanningPage() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex items-center gap-2 sm:col-span-2">
+            <label
+              htmlFor="has_children"
+              className="flex cursor-pointer items-center gap-3 rounded-2xl border border-border/70 bg-secondary/40 p-4 sm:col-span-2"
+            >
               <Checkbox
                 id="has_children"
                 checked={hasChildren}
@@ -270,12 +289,15 @@ export function NewPlanningPage() {
                   setValue("has_children", v)
                 }}
               />
-              <Label htmlFor="has_children" className="font-normal">
+              <span className="text-sm font-medium">
                 Viajaré con menores de edad
-              </Label>
-            </div>
+              </span>
+            </label>
             <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor="special_requirements">
+              <Label
+                htmlFor="special_requirements"
+                className="text-[13px] text-muted-foreground"
+              >
                 Requerimientos especiales (opcional)
               </Label>
               <Textarea
@@ -286,7 +308,7 @@ export function NewPlanningPage() {
             </div>
           </CardContent>
           <CardFooter className="flex justify-end">
-            <Button type="submit" disabled={mutation.isPending}>
+            <Button type="submit" size="lg" disabled={mutation.isPending}>
               {mutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
               Continuar con preguntas dinámicas
             </Button>

@@ -3,9 +3,12 @@ import { useNavigate, useParams } from "react-router-dom"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   ArrowRight,
+  Calendar,
   Check,
   Loader2,
+  MapPin,
   Sparkles,
+  Users,
   Wand2,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -118,7 +121,7 @@ export function PlanningPage() {
 
   if (planningQuery.isLoading || currentQuery.isLoading) {
     return (
-      <div className="flex justify-center py-20">
+      <div className="flex justify-center py-24">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     )
@@ -126,7 +129,7 @@ export function PlanningPage() {
 
   if (planningQuery.isError || !planningQuery.data) {
     return (
-      <Card>
+      <Card className="border-destructive/30 bg-destructive/5">
         <CardContent className="py-10 text-center text-sm text-destructive">
           No se pudo cargar la planificación.
         </CardContent>
@@ -139,39 +142,55 @@ export function PlanningPage() {
   const depth = current?.depth ?? 0
   const progress = Math.min(100, (depth / 4) * 100 + 20)
   const canGenerate =
-    !!current?.can_generate_itinerary ||
-    planning.status !== "in_progress"
+    !!current?.can_generate_itinerary || planning.status !== "in_progress"
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold tracking-tight">
-          Planifiquemos tu viaje
-        </h1>
-        <p className="text-muted-foreground">
-          {general.destination_city
-            ? `${general.destination_city}, ${general.destination_country}`
-            : general.destination_country}{" "}
-          · {general.total_days} días · {general.number_of_travelers} viajero(s)
-        </p>
+    <div className="mx-auto max-w-3xl space-y-8">
+      <div className="animate-fade-up space-y-3">
+        <div className="space-y-1.5">
+          <p className="text-[13px] font-medium uppercase tracking-wider text-primary">
+            Planificación en curso
+          </p>
+          <h1 className="text-[30px] font-semibold leading-tight tracking-tight sm:text-[34px]">
+            Planifiquemos tu viaje
+          </h1>
+        </div>
+        <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1.5 font-medium">
+            <MapPin className="h-3.5 w-3.5" />
+            {general.destination_city
+              ? `${general.destination_city}, ${general.destination_country}`
+              : general.destination_country}
+          </span>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1.5 font-medium">
+            <Calendar className="h-3.5 w-3.5" />
+            {general.total_days} días
+          </span>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1.5 font-medium">
+            <Users className="h-3.5 w-3.5" />
+            {general.number_of_travelers} viajero(s)
+          </span>
+        </div>
       </div>
 
-      <Card>
+      <Card className="animate-fade-up animate-delay-1">
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-primary" />
-              <CardTitle className="text-lg">
-                Preguntas dinámicas
-              </CardTitle>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <Sparkles className="h-4 w-4" />
+              </span>
+              <CardTitle className="text-lg">Preguntas dinámicas</CardTitle>
             </div>
             <Badge variant="secondary">Ronda {depth + 1}</Badge>
           </div>
-          <CardDescription>
+          <CardDescription className="pt-1">
             Cada respuesta nos ayuda a afinar tu itinerario. Puedes generarlo
             cuando tengas suficiente información.
           </CardDescription>
-          <Progress value={progress} className="mt-4" />
+          <div className="pt-4">
+            <Progress value={progress} />
+          </div>
         </CardHeader>
         <CardContent>
           {current && current.questions.length > 0 ? (
@@ -181,7 +200,7 @@ export function PlanningPage() {
               onChange={setAnswers}
             />
           ) : (
-            <div className="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground">
+            <div className="rounded-2xl border border-dashed border-border bg-secondary/30 p-8 text-center text-sm text-muted-foreground">
               No hay más preguntas pendientes. Puedes generar el itinerario.
             </div>
           )}
@@ -190,8 +209,8 @@ export function PlanningPage() {
           )}
         </CardContent>
         <Separator />
-        <CardFooter className="flex flex-col gap-3 pt-6 sm:flex-row sm:justify-between">
-          <div className="text-xs text-muted-foreground">
+        <CardFooter className="flex flex-col gap-4 pt-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="text-xs font-medium text-muted-foreground">
             {canGenerate
               ? "Ya puedes generar el itinerario o seguir respondiendo."
               : "Responde esta ronda para continuar."}
@@ -232,7 +251,7 @@ export function PlanningPage() {
         </CardFooter>
       </Card>
 
-      <Card>
+      <Card className="animate-fade-up animate-delay-2">
         <CardHeader>
           <CardTitle className="text-base">Resumen general</CardTitle>
         </CardHeader>
@@ -261,9 +280,11 @@ export function PlanningPage() {
       </Card>
 
       {planning.status !== "in_progress" && (
-        <Card className="border-primary/30 bg-primary/5">
-          <CardContent className="flex items-center gap-3 py-4 text-sm">
-            <Check className="h-5 w-5 text-primary" />
+        <Card className="animate-fade-up border-primary/30 bg-primary/5 shadow-none">
+          <CardContent className="flex items-center gap-3 py-4 text-sm font-medium">
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/15 text-primary">
+              <Check className="h-4 w-4" />
+            </span>
             Esta planificación ya está lista para generar un itinerario.
           </CardContent>
         </Card>
@@ -282,11 +303,17 @@ function Field({
   full?: boolean
 }) {
   return (
-    <div className={full ? "sm:col-span-2" : undefined}>
-      <div className="text-xs uppercase tracking-wide text-muted-foreground">
+    <div
+      className={
+        full
+          ? "rounded-2xl border border-border/70 bg-secondary/40 p-4 sm:col-span-2"
+          : "rounded-2xl border border-border/70 bg-secondary/40 p-4"
+      }
+    >
+      <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
         {label}
       </div>
-      <div className="font-medium">{children}</div>
+      <div className="mt-1 font-semibold">{children}</div>
     </div>
   )
 }

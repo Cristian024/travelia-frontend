@@ -1,6 +1,5 @@
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom"
 import { Compass, LogOut, Map, Plus, User } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,10 +28,28 @@ export function AppLayout() {
       end={to === "/"}
       className={({ isActive }) =>
         cn(
-          "flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+          "flex items-center gap-2 rounded-full px-4 py-1.5 text-[13px] font-medium transition-all duration-200 ease-apple",
           isActive
-            ? "bg-primary text-primary-foreground"
-            : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+            ? "bg-card text-foreground shadow-apple-xs"
+            : "text-muted-foreground hover:text-foreground",
+        )
+      }
+    >
+      {icon}
+      {label}
+    </NavLink>
+  )
+
+  const mobileNavItem = (to: string, icon: React.ReactNode, label: string) => (
+    <NavLink
+      to={to}
+      end={to === "/"}
+      className={({ isActive }) =>
+        cn(
+          "flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors",
+          isActive
+            ? "bg-primary text-primary-foreground shadow-apple-sm"
+            : "bg-secondary text-muted-foreground",
         )
       }
     >
@@ -42,15 +59,20 @@ export function AppLayout() {
   )
 
   return (
-    <div className="min-h-screen bg-muted/30">
-      <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/75">
-        <div className="container flex h-16 items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 font-semibold">
-            <Compass className="h-6 w-6 text-primary" />
-            <span className="text-lg">Travelia</span>
+    <div className="min-h-screen bg-background">
+      <header className="material-bar sticky top-0 z-40 border-b border-border/60">
+        <div className="container flex h-16 items-center justify-between gap-4">
+          <Link
+            to="/"
+            className="flex items-center gap-2.5 font-semibold transition-opacity hover:opacity-80"
+          >
+            <span className="flex h-9 w-9 items-center justify-center rounded-[0.7rem] bg-primary text-primary-foreground shadow-apple-sm">
+              <Compass className="h-5 w-5" />
+            </span>
+            <span className="text-[17px] tracking-tight">Travelia</span>
           </Link>
 
-          <nav className="hidden items-center gap-1 md:flex">
+          <nav className="hidden items-center gap-0.5 rounded-full bg-secondary/70 p-1 md:flex">
             {navItem("/", <Map className="h-4 w-4" />, "Mis itinerarios")}
             {navItem(
               "/planning/new",
@@ -61,20 +83,20 @@ export function AppLayout() {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
+              <button className="flex items-center gap-2.5 rounded-full p-0.5 pr-1 outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-b from-primary to-primary/85 text-xs font-semibold text-primary-foreground shadow-apple-sm ring-1 ring-inset ring-white/20">
                   {initials ?? "?"}
                 </div>
                 <span className="hidden text-sm font-medium sm:inline">
                   {user?.full_name}
                 </span>
-              </Button>
+              </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuContent align="end" className="w-60">
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col gap-0.5">
                   <span className="text-sm font-medium">{user?.full_name}</span>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="truncate text-xs text-muted-foreground">
                     {user?.email}
                   </span>
                 </div>
@@ -90,6 +112,7 @@ export function AppLayout() {
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
+                className="text-destructive focus:bg-destructive/10 focus:text-destructive"
                 onClick={() => {
                   logout()
                   navigate("/login")
@@ -101,14 +124,14 @@ export function AppLayout() {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-        <div className="container flex gap-1 overflow-x-auto pb-2 md:hidden">
-          {navItem("/", <Map className="h-4 w-4" />, "Itinerarios")}
-          {navItem("/planning/new", <Plus className="h-4 w-4" />, "Nuevo")}
-          {navItem("/profile", <User className="h-4 w-4" />, "Perfil")}
+        <div className="container flex gap-2 overflow-x-auto pb-3 md:hidden">
+          {mobileNavItem("/", <Map className="h-4 w-4" />, "Itinerarios")}
+          {mobileNavItem("/planning/new", <Plus className="h-4 w-4" />, "Nuevo")}
+          {mobileNavItem("/profile", <User className="h-4 w-4" />, "Perfil")}
         </div>
       </header>
 
-      <main className="container py-8">
+      <main className="container py-8 md:py-12">
         <Outlet />
       </main>
     </div>

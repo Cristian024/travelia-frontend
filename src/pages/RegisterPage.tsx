@@ -80,7 +80,10 @@ export function RegisterPage() {
         phone: values.phone?.trim() ? values.phone : null,
       })
       navigate("/", { replace: true })
-      toast({ title: "¡Bienvenido a Travelia!", description: "Tu cuenta fue creada correctamente." })
+      toast({
+        title: "¡Bienvenido a Travelia!",
+        description: "Tu cuenta fue creada correctamente.",
+      })
     } catch (err) {
       toast({
         variant: "destructive",
@@ -93,35 +96,54 @@ export function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary/10 via-background to-background p-4 py-10">
-      <Card className="w-full max-w-xl">
-        <CardHeader className="space-y-2 text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/15">
-            <Compass className="h-6 w-6 text-primary" />
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background p-4 py-12">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -top-48 left-1/2 h-[40rem] w-[40rem] -translate-x-1/2 rounded-full bg-primary/12 blur-[130px]"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -bottom-40 -right-24 h-[28rem] w-[28rem] rounded-full bg-sky-400/12 blur-[130px]"
+      />
+
+      <Card className="animate-scale-in relative w-full max-w-xl border-border/60 shadow-apple-xl">
+        <CardHeader className="space-y-3 text-center">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-b from-primary to-primary/85 text-primary-foreground shadow-apple-sm">
+            <Compass className="h-7 w-7" />
           </div>
-          <CardTitle>Crea tu cuenta</CardTitle>
-          <CardDescription>
-            Cuéntanos un poco sobre ti para personalizar tus viajes
-          </CardDescription>
+          <div className="space-y-1.5">
+            <CardTitle className="text-[28px] leading-tight">
+              Crea tu cuenta
+            </CardTitle>
+            <CardDescription className="text-balance">
+              Cuéntanos un poco sobre ti para personalizar tus viajes
+            </CardDescription>
+          </div>
         </CardHeader>
         <form onSubmit={handleSubmit(onSubmit)}>
           <CardContent className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor="full_name">Nombre completo</Label>
+              <Label htmlFor="full_name" className="text-[13px] text-muted-foreground">
+                Nombre completo
+              </Label>
               <Input id="full_name" {...register("full_name")} />
               {errors.full_name && (
                 <p className="text-xs text-destructive">{errors.full_name.message}</p>
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Correo electrónico</Label>
+              <Label htmlFor="email" className="text-[13px] text-muted-foreground">
+                Correo electrónico
+              </Label>
               <Input id="email" type="email" {...register("email")} />
               {errors.email && (
                 <p className="text-xs text-destructive">{errors.email.message}</p>
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Contraseña</Label>
+              <Label htmlFor="password" className="text-[13px] text-muted-foreground">
+                Contraseña
+              </Label>
               <Input
                 id="password"
                 type="password"
@@ -133,14 +155,21 @@ export function RegisterPage() {
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="birth_date">Fecha de nacimiento</Label>
+              <Label htmlFor="birth_date" className="text-[13px] text-muted-foreground">
+                Fecha de nacimiento
+              </Label>
               <Input id="birth_date" type="date" {...register("birth_date")} />
               {errors.birth_date && (
                 <p className="text-xs text-destructive">{errors.birth_date.message}</p>
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="country_of_residence">País de residencia</Label>
+              <Label
+                htmlFor="country_of_residence"
+                className="text-[13px] text-muted-foreground"
+              >
+                País de residencia
+              </Label>
               <Input
                 id="country_of_residence"
                 placeholder="Ej. Colombia"
@@ -153,11 +182,15 @@ export function RegisterPage() {
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="phone">Teléfono (opcional)</Label>
+              <Label htmlFor="phone" className="text-[13px] text-muted-foreground">
+                Teléfono (opcional)
+              </Label>
               <Input id="phone" {...register("phone")} />
             </div>
             <div className="space-y-2">
-              <Label>Idioma preferido</Label>
+              <Label className="text-[13px] text-muted-foreground">
+                Idioma preferido
+              </Label>
               <Select
                 value={language}
                 onValueChange={(v) => setValue("preferred_language", v)}
@@ -175,8 +208,13 @@ export function RegisterPage() {
               </Select>
             </div>
           </CardContent>
-          <CardFooter className="flex flex-col gap-3">
-            <Button type="submit" className="w-full" disabled={loading}>
+          <CardFooter className="flex flex-col gap-4">
+            <Button
+              type="submit"
+              size="lg"
+              className="w-full text-[15px]"
+              disabled={loading}
+            >
               {loading && <Loader2 className="h-4 w-4 animate-spin" />}
               Crear cuenta
             </Button>
