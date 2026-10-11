@@ -1,35 +1,78 @@
 import { useState } from "react"
 import { Link, useParams } from "react-router-dom"
-import { useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery } from "@tanstack/react-query"
+import { format, parseISO } from "date-fns"
+import { es } from "date-fns/locale"
 import {
   ArrowLeft,
+  Backpack,
   BedDouble,
   Calendar,
   Clock,
+  CloudSun,
   DollarSign,
+  Download,
+  ExternalLink,
   Loader2,
   MapPin,
   RefreshCcw,
+  Route,
   Sparkles,
   Star,
+  Wallet,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs"
 import { itinerariesApi } from "@/lib/endpoints"
 import { formatDate } from "@/lib/utils"
+import { useToast } from "@/hooks/use-toast"
+import { apiErrorMessage } from "@/lib/api"
 import { ReplaceDestinationDialog } from "@/components/itinerary/ReplaceDestinationDialog"
-import type { DestinationResponse } from "@/types/api"
+import { PackingListPanel } from "@/components/itinerary/PackingListPanel"
+import { BudgetPanel } from "@/components/itinerary/BudgetPanel"
+import type { DailyForecast, DestinationResponse, WeatherForecast } from "@/types/api"
 
 export function ItineraryDetailPage() {
   const { itineraryId } = useParams<{ itineraryId: string }>()
   const [replacingId, setReplacingId] = useState<string | null>(null)
+  const { toast } = useToast()
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["itinerary", itineraryId],
     queryFn: () => itinerariesApi.get(itineraryId!),
     enabled: !!itineraryId,
+  })
+
+  const exportMutation = useMutation({
+    mutationFn: () => itinerariesApi.exportPdf(itineraryId!),
+    onSuccess: (blob) => {
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      const safeTitle =
+        (data?.title ?? "itinerario").replace(/[^\w\s-]/g, "").trim() ||
+        "itinerario"
+      a.download = `${safeTitle}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(url)
+      toast({ title: "PDF descargado" })
+    },
+    onError: (err) =>
+      toast({
+        variant: "destructive",
+        title: "No se pudo exportar el PDF",
+        description: apiErrorMessage(err),
+      }),
   })
 
   if (isLoading) {
@@ -68,18 +111,34 @@ export function ItineraryDetailPage() {
       </Button>
 
       <div className="space-y-4">
-        <div className="space-y-3">
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-[34px] font-semibold leading-tight tracking-tight sm:text-[40px]">
-              {data.title}
-            </h1>
-            <Badge variant={data.status === "active" ? "default" : "secondary"}>
-              {data.status === "active" ? "Activo" : "Archivado"}
-            </Badge>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="space-y-3">
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="text-[34px] font-semibold leading-tight tracking-tight sm:text-[40px]">
+                {data.title}
+              </h1>
+              <Badge variant={data.status === "active" ? "default" : "secondary"}>
+                {data.status === "active" ? "Activo" : "Archivado"}
+              </Badge>
+              {data.is_public && <Badge variant="success">Público</Badge>}
+            </div>
+            <p className="max-w-2xl text-[15px] leading-relaxed text-muted-foreground">
+              {data.summary}
+            </p>
           </div>
-          <p className="max-w-2xl text-[15px] leading-relaxed text-muted-foreground">
-            {data.summary}
-          </p>
+          <Button
+            variant="outline"
+            className="shrink-0"
+            onClick={() => exportMutation.mutate()}
+            disabled={exportMutation.isPending}
+          >
+            {exportMutation.isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Download className="h-4 w-4" />
+            )}
+            Descargar PDF
+          </Button>
         </div>
 
         <div className="grid max-w-2xl gap-3 sm:grid-cols-3">
@@ -99,23 +158,50 @@ export function ItineraryDetailPage() {
             value={`${data.destinations.length} paradas`}
           />
         </div>
+
+        {data.weather && <WeatherStrip weather={data.weather} />}
       </div>
 
       <Separator />
 
-      <div className="space-y-6">
-        {data.destinations
-          .slice()
-          .sort((a, b) => a.order - b.order)
-          .map((dest, i) => (
-            <DestinationCard
-              key={dest.destination_id}
-              destination={dest}
-              index={i}
-              onReplace={() => setReplacingId(dest.destination_id)}
-            />
-          ))}
-      </div>
+      <Tabs defaultValue="itinerary">
+        <TabsList>
+          <TabsTrigger value="itinerary">
+            <Route className="h-4 w-4" />
+            Itinerario
+          </TabsTrigger>
+          <TabsTrigger value="packing">
+            <Backpack className="h-4 w-4" />
+            Equipaje
+          </TabsTrigger>
+          <TabsTrigger value="budget">
+            <Wallet className="h-4 w-4" />
+            Presupuesto
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="itinerary" className="space-y-6">
+          {data.destinations
+            .slice()
+            .sort((a, b) => a.order - b.order)
+            .map((dest, i) => (
+              <DestinationCard
+                key={dest.destination_id}
+                destination={dest}
+                index={i}
+                onReplace={() => setReplacingId(dest.destination_id)}
+              />
+            ))}
+        </TabsContent>
+
+        <TabsContent value="packing">
+          {itineraryId && <PackingListPanel itineraryId={itineraryId} />}
+        </TabsContent>
+
+        <TabsContent value="budget">
+          {itineraryId && <BudgetPanel itineraryId={itineraryId} />}
+        </TabsContent>
+      </Tabs>
 
       {replacingDestination && itineraryId && (
         <ReplaceDestinationDialog
@@ -126,6 +212,49 @@ export function ItineraryDetailPage() {
           destinationName={replacingDestination.name}
         />
       )}
+    </div>
+  )
+}
+
+function WeatherStrip({ weather }: { weather: WeatherForecast }) {
+  return (
+    <div className="max-w-3xl rounded-3xl border border-border/70 bg-card p-4 shadow-apple-xs">
+      <div className="flex items-center gap-2 text-sm font-semibold">
+        <CloudSun className="h-4 w-4 text-primary" />
+        Clima en {weather.city}, {weather.country}
+      </div>
+      {weather.summary && (
+        <p className="mt-1 text-xs text-muted-foreground">{weather.summary}</p>
+      )}
+      {weather.days.length > 0 && (
+        <div className="mt-4 flex gap-3 overflow-x-auto pb-1">
+          {weather.days.map((day) => (
+            <WeatherDay key={day.date} day={day} />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function WeatherDay({ day }: { day: DailyForecast }) {
+  const isUrl = !!day.icon && /^(https?:)?\//.test(day.icon)
+  return (
+    <div className="flex w-24 shrink-0 flex-col items-center gap-1.5 rounded-2xl bg-secondary/50 p-3 text-center">
+      <span className="text-xs font-medium capitalize text-muted-foreground">
+        {format(parseISO(day.date), "EEE d", { locale: es })}
+      </span>
+      {isUrl ? (
+        <img src={day.icon!} alt={day.description} className="h-8 w-8" />
+      ) : (
+        <span className="text-2xl leading-none">{day.icon ?? "🌤️"}</span>
+      )}
+      <span className="text-sm font-semibold tabular-nums">
+        {Math.round(day.temp_max)}° / {Math.round(day.temp_min)}°
+      </span>
+      <span className="line-clamp-1 text-[11px] text-muted-foreground">
+        {day.description}
+      </span>
     </div>
   )
 }
@@ -230,6 +359,19 @@ function DestinationCard({
             </div>
           )}
         </div>
+
+        {destination.google_maps_url && (
+          <Button asChild variant="outline" size="sm" className="w-fit">
+            <a
+              href={destination.google_maps_url}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <ExternalLink className="h-4 w-4" />
+              Ver en Google Maps
+            </a>
+          </Button>
+        )}
 
         {destination.highlights.length > 0 && (
           <div className="space-y-3">

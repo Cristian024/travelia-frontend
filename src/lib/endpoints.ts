@@ -2,17 +2,25 @@ import { api } from "./api"
 import type {
   AnswerQuestionsRequest,
   AnswerReplacementRequest,
+  ChangeSubscriptionRequest,
+  CreateExpenseRequest,
   CreatePlanningRequest,
   CurrentQuestionsResponse,
   DestinationQuestionsResponse,
+  ExpenseResponse,
+  ExpenseSummaryResponse,
   GeneralQuestion,
   ItineraryResponse,
   ItinerarySummaryResponse,
   LoginRequest,
+  PackingList,
   PlanningResponse,
+  PublicFeedResponse,
   QuestionTreeResponse,
   RegisterRequest,
+  SubscriptionResponse,
   TokenResponse,
+  UpdateExpenseRequest,
   UpdateUserRequest,
   UserResponse,
 } from "@/types/api"
@@ -28,6 +36,17 @@ export const usersApi = {
   me: () => api.get<UserResponse>("/api/v1/users/me").then((r) => r.data),
   update: (body: UpdateUserRequest) =>
     api.patch<UserResponse>("/api/v1/users/me", body).then((r) => r.data),
+}
+
+export const subscriptionsApi = {
+  me: () =>
+    api
+      .get<SubscriptionResponse>("/api/v1/subscriptions/me")
+      .then((r) => r.data),
+  change: (body: ChangeSubscriptionRequest) =>
+    api
+      .post<SubscriptionResponse>("/api/v1/subscriptions/me", body)
+      .then((r) => r.data),
 }
 
 export const planningApi = {
@@ -100,4 +119,67 @@ export const itinerariesApi = {
         `/api/v1/itineraries/${itineraryId}/destinations/${destinationId}/replace`,
       )
       .then((r) => r.data),
+  publicFeed: (page = 1, pageSize = 10) =>
+    api
+      .get<PublicFeedResponse>("/api/v1/itineraries/public", {
+        params: { page, page_size: pageSize },
+      })
+      .then((r) => r.data),
+  clone: (itineraryId: string) =>
+    api
+      .post<ItineraryResponse>(`/api/v1/itineraries/${itineraryId}/clone`)
+      .then((r) => r.data),
+  setVisibility: (itineraryId: string, isPublic: boolean) =>
+    api
+      .patch<ItineraryResponse>(`/api/v1/itineraries/${itineraryId}/visibility`, {
+        is_public: isPublic,
+      })
+      .then((r) => r.data),
+  getPackingList: (itineraryId: string) =>
+    api
+      .get<PackingList>(`/api/v1/itineraries/${itineraryId}/packing-list`)
+      .then((r) => r.data),
+  generatePackingList: (itineraryId: string) =>
+    api
+      .post<PackingList>(`/api/v1/itineraries/${itineraryId}/packing-list`)
+      .then((r) => r.data),
+  updatePackingItem: (itineraryId: string, position: number, checked: boolean) =>
+    api
+      .patch<PackingList>(
+        `/api/v1/itineraries/${itineraryId}/packing-list/items/${position}`,
+        { checked },
+      )
+      .then((r) => r.data),
+  exportPdf: (itineraryId: string) =>
+    api
+      .get(`/api/v1/itineraries/${itineraryId}/export/pdf`, {
+        responseType: "blob",
+      })
+      .then((r) => r.data as Blob),
+}
+
+export const expensesApi = {
+  summary: (itineraryId: string) =>
+    api
+      .get<ExpenseSummaryResponse>(
+        `/api/v1/itineraries/${itineraryId}/expenses/summary`,
+      )
+      .then((r) => r.data),
+  list: (itineraryId: string) =>
+    api
+      .get<ExpenseResponse[]>(`/api/v1/itineraries/${itineraryId}/expenses`)
+      .then((r) => r.data),
+  create: (itineraryId: string, body: CreateExpenseRequest) =>
+    api
+      .post<ExpenseResponse>(
+        `/api/v1/itineraries/${itineraryId}/expenses`,
+        body,
+      )
+      .then((r) => r.data),
+  update: (expenseId: string, body: UpdateExpenseRequest) =>
+    api
+      .patch<ExpenseResponse>(`/api/v1/expenses/${expenseId}`, body)
+      .then((r) => r.data),
+  remove: (expenseId: string) =>
+    api.delete(`/api/v1/expenses/${expenseId}`).then((r) => r.data),
 }

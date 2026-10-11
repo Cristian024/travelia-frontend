@@ -3,10 +3,12 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { CalendarDays, Loader2, Mail, Save } from "lucide-react"
+import { CalendarDays, Crown, Loader2, Mail, Save } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Badge } from "@/components/ui/badge"
+import { Progress } from "@/components/ui/progress"
 import {
   Card,
   CardContent,
@@ -24,10 +26,11 @@ import {
 } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { useAuth } from "@/context/AuthContext"
-import { usersApi } from "@/lib/endpoints"
+import { subscriptionsApi, usersApi } from "@/lib/endpoints"
 import { useToast } from "@/hooks/use-toast"
 import { apiErrorMessage } from "@/lib/api"
 import { formatDate } from "@/lib/utils"
+import type { SubscriptionType } from "@/types/api"
 
 const schema = z.object({
   full_name: z.string().min(2, "Ingresa tu nombre"),
@@ -47,7 +50,7 @@ const LANGUAGES = [
 ]
 
 export function ProfilePage() {
-  const { user, refreshUser } = useAuth()
+  const { user, subscription, refreshUser, refreshSubscription } = useAuth()
   const { toast } = useToast()
   const qc = useQueryClient()
 
@@ -103,6 +106,28 @@ export function ProfilePage() {
     })
   }
 
+  const subscriptionMutation = useMutation({
+    mutationFn: (subscription_type: SubscriptionType) =>
+      subscriptionsApi.change({ subscription_type }),
+    onSuccess: async (data) => {
+      await refreshSubscription()
+      qc.setQueryData(["subscription"], data)
+      toast({
+        title: "Suscripción actualizada",
+        description:
+          data.subscription_type === "PREMIUM"
+            ? "Ahora eres usuario Premium."
+            : "Volviste al plan Free.",
+      })
+    },
+    onError: (err) =>
+      toast({
+        title: "No se pudo cambiar el plan",
+        description: apiErrorMessage(err, "Inténtalo de nuevo más tarde"),
+        variant: "destructive",
+      }),
+  })
+
   if (!user) return null
 
   const initials = user.full_name
@@ -111,6 +136,11 @@ export function ProfilePage() {
     .slice(0, 2)
     .join("")
     .toUpperCase()
+
+  const isPremium = subscription?.subscription_type === "PREMIUM"
+  const limit = subscription?.monthly_planning_limit ?? null
+  const used = subscription?.monthly_plannings_used ?? 0
+  const usagePct = limit ? Math.min(100, (used / limit) * 100) : 0
 
   return (
     <div className="mx-auto max-w-2xl space-y-8">
@@ -144,6 +174,85 @@ export function ProfilePage() {
             </div>
           </div>
         </CardContent>
+      </Card>
+
+      <Card className="animate-fade-up animate-delay-2">
+        <CardHeader className="flex-row items-start justify-between gap-4 space-y-0">
+          <div className="space-y-1.5">
+            <CardTitle className="flex items-center gap-2 text-xl">
+              Suscripción
+              <Badge variant={isPremium ? "success" : "secondary"}>
+                {isPremium ? (
+                  <Crown className="h-3 w-3" />
+                ) : null}
+                {subscription?.subscription_type ?? "FREE"}
+              </Badge>
+            </CardTitle>
+            <CardDescription>
+              {isPremium
+                ? "Disfrutas de planificaciones ilimitadas y más días por viaje."
+                : "Plan gratuito con límite mensual de planificaciones."}
+            </CardDescription>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-5">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">
+                Planificaciones este mes
+              </span>
+              <span className="font-medium tabular-nums">
+                {limit === null ? `${used} / ∞` : `${used} / ${limit}`}
+              </span>
+            </div>
+            <Progress value={limit === null ? 0 : usagePct} />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="rounded-2xl bg-secondary/60 p-4">
+              <div className="text-xs text-muted-foreground">
+                Días máximos por viaje
+              </div>
+              <div className="mt-1 text-lg font-semibold tabular-nums">
+                {subscription?.max_total_days ?? "—"}
+              </div>
+            </div>
+            <div className="rounded-2xl bg-secondary/60 p-4">
+              <div className="text-xs text-muted-foreground">
+                Destinos máximos
+              </div>
+              <div className="mt-1 text-lg font-semibold tabular-nums">
+                {subscription?.max_destinations ?? "—"}
+              </div>
+            </div>
+          </div>
+        </CardContent>
+        <CardFooter className="justify-end pt-0">
+          {isPremium ? (
+            <Button
+              variant="outline"
+              disabled={subscriptionMutation.isPending}
+              onClick={() => subscriptionMutation.mutate("FREE")}
+            >
+              {subscriptionMutation.isPending && (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              )}
+              Volver a Free
+            </Button>
+          ) : (
+            <Button
+              disabled={subscriptionMutation.isPending}
+              onClick={() => subscriptionMutation.mutate("PREMIUM")}
+            >
+              {subscriptionMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Crown className="h-4 w-4" />
+              )}
+              Cambiar a Premium
+            </Button>
+          )}
+        </CardFooter>
       </Card>
 
       <Card className="animate-fade-up animate-delay-2">

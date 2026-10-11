@@ -1,17 +1,25 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { tokenStorage } from "@/lib/api"
-import { usersApi, authApi } from "@/lib/endpoints"
-import type { LoginRequest, RegisterRequest, UserResponse } from "@/types/api"
+import { usersApi, authApi, subscriptionsApi } from "@/lib/endpoints"
+import type {
+  LoginRequest,
+  RegisterRequest,
+  SubscriptionResponse,
+  UserResponse,
+} from "@/types/api"
 
 interface AuthContextValue {
   user: UserResponse | null
+  subscription: SubscriptionResponse | null
   isLoading: boolean
+  isSubscriptionLoading: boolean
   isAuthenticated: boolean
   login: (body: LoginRequest) => Promise<void>
   register: (body: RegisterRequest) => Promise<void>
   logout: () => void
   refreshUser: () => Promise<void>
+  refreshSubscription: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -32,6 +40,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     staleTime: 60_000,
   })
 
+  const {
+    data: subscription,
+    isLoading: isSubscriptionLoading,
+    refetch: refetchSubscription,
+  } = useQuery({
+    queryKey: ["subscription"],
+    queryFn: subscriptionsApi.me,
+    enabled: hasToken,
+    retry: false,
+    staleTime: 60_000,
+  })
+
   useEffect(() => {
     const onStorage = () => setHasToken(!!tokenStorage.getAccess())
     window.addEventListener("storage", onStorage)
@@ -42,14 +62,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const tokens = await authApi.login(body)
     tokenStorage.set(tokens)
     setHasToken(true)
-    await refetch()
+    await Promise.all([refetch(), refetchSubscription()])
   }
 
   const register = async (body: RegisterRequest) => {
     const tokens = await authApi.register(body)
     tokenStorage.set(tokens)
     setHasToken(true)
-    await refetch()
+    await Promise.all([refetch(), refetchSubscription()])
   }
 
   const logout = () => {
@@ -62,16 +82,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await refetch()
   }
 
+  const refreshSubscription = async () => {
+    await refetchSubscription()
+  }
+
   return (
     <AuthContext.Provider
       value={{
         user: user ?? null,
+        subscription: subscription ?? null,
         isLoading: hasToken && isLoading,
+        isSubscriptionLoading: hasToken && isSubscriptionLoading,
         isAuthenticated: hasToken && !!user,
         login,
         register,
         logout,
         refreshUser,
+        refreshSubscription,
       }}
     >
       {children}

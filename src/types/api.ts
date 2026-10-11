@@ -24,6 +24,16 @@ export type QuestionType =
 
 export type ReplacementStatus = "none" | "in_progress"
 
+export type SubscriptionType = "FREE" | "PREMIUM"
+
+export type ExpenseCategory =
+  | "food"
+  | "transport"
+  | "accommodation"
+  | "activities"
+  | "shopping"
+  | "other"
+
 export interface TokenResponse {
   access_token: string
   refresh_token: string
@@ -63,6 +73,100 @@ export interface UpdateUserRequest {
   country_of_residence?: string | null
   phone?: string | null
   preferred_language?: string | null
+}
+
+export interface SubscriptionResponse {
+  subscription_type: SubscriptionType
+  is_premium: boolean
+  premium_since: string | null
+  monthly_planning_limit: number | null
+  monthly_plannings_used: number
+  max_total_days: number
+  max_destinations: number
+}
+
+export interface ChangeSubscriptionRequest {
+  subscription_type: SubscriptionType
+}
+
+export interface DailyForecast {
+  date: string
+  temp_min: number
+  temp_max: number
+  description: string
+  icon?: string | null
+}
+
+export interface WeatherForecast {
+  city: string
+  country: string
+  days: DailyForecast[]
+  summary?: string
+}
+
+export interface PackingItem {
+  category: string
+  item: string
+  quantity?: string | null
+  reason?: string | null
+  checked?: boolean
+}
+
+export interface PackingList {
+  itinerary_id: string
+  destination_summary: string
+  weather_summary?: string
+  items: PackingItem[]
+  notes?: string
+}
+
+export interface CategoryBreakdown {
+  category: string
+  total: number
+}
+
+export interface ExpenseResponse {
+  id: string
+  itinerary_id: string
+  user_id: string
+  category: ExpenseCategory
+  description: string
+  amount: number
+  currency: string
+  expense_date: string
+  created_at: string
+  updated_at: string
+}
+
+export interface CreateExpenseRequest {
+  category: ExpenseCategory
+  description: string
+  amount: number
+  currency?: string
+  expense_date: string
+}
+
+export interface UpdateExpenseRequest {
+  category?: ExpenseCategory | null
+  description?: string | null
+  amount?: number | null
+  currency?: string | null
+  expense_date?: string | null
+}
+
+export interface ExpenseSummaryResponse {
+  itinerary_id: string
+  currency: string
+  total_estimated: number
+  total_real: number
+  difference: number
+  status: string
+  expenses_count: number
+  by_category: CategoryBreakdown[]
+}
+
+export interface SetVisibilityRequest {
+  is_public: boolean
 }
 
 export interface DynamicQuestion {
@@ -172,6 +276,7 @@ export interface DestinationResponse {
   transportation: string
   estimated_cost: string | null
   activities: ActivityResponse[]
+  google_maps_url?: string | null
   replacement: DestinationReplacementResponse
 }
 
@@ -186,6 +291,8 @@ export interface ItineraryResponse {
   total_days: number
   destinations: DestinationResponse[]
   status: ItineraryStatus
+  is_public?: boolean
+  weather?: WeatherForecast | null
   created_at: string
   updated_at: string
 }
@@ -200,7 +307,16 @@ export interface ItinerarySummaryResponse {
   total_days: number
   destination_count: number
   status: ItineraryStatus
+  is_public?: boolean
   created_at: string
+}
+
+export interface PublicFeedResponse {
+  items: ItinerarySummaryResponse[]
+  page: number
+  page_size: number
+  total: number
+  total_pages: number
 }
 
 export interface DestinationQuestionsResponse {
