@@ -9,6 +9,9 @@ on:
       - 'main'
   workflow_dispatch:
 
+env:
+  VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
+
 jobs:
   build:
     runs-on: ubuntu-latest
