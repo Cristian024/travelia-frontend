@@ -1,7 +1,7 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios"
 import type { TokenResponse } from "@/types/api"
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000"
+const BASE_URL = "https://traveliaapp-bzaaabhuc8g2ech5.mexicocentral-01.azurewebsites.net"
 
 const ACCESS_KEY = "travelia.access_token"
 const REFRESH_KEY = "travelia.refresh_token"
