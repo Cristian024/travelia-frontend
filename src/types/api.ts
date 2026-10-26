@@ -26,6 +26,15 @@ export type ReplacementStatus = "none" | "in_progress"
 
 export type SubscriptionType = "FREE" | "PREMIUM"
 
+export type UserRole = "USER" | "ADMIN"
+
+export type PaymentStatus =
+  | "PENDING"
+  | "APPROVED"
+  | "DECLINED"
+  | "VOIDED"
+  | "ERROR"
+
 export type ExpenseCategory =
   | "food"
   | "transport"
@@ -63,8 +72,32 @@ export interface UserResponse {
   country_of_residence: string
   phone: string | null
   preferred_language: string
+  role: UserRole
   created_at: string
   updated_at: string
+}
+
+export interface UserAdminResponse {
+  id: string
+  email: string
+  full_name: string
+  role: UserRole
+  subscription_type: string
+  premium_since: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface UpdateUserRoleRequest {
+  role: UserRole
+}
+
+export interface PaginatedUsersResponse {
+  items: UserAdminResponse[]
+  page: number
+  page_size: number
+  total: number
+  total_pages: number
 }
 
 export interface UpdateUserRequest {
@@ -89,6 +122,65 @@ export interface ChangeSubscriptionRequest {
   subscription_type: SubscriptionType
 }
 
+export interface PlanResponse {
+  id: string
+  code: string
+  name: string
+  amount_in_cents: number
+  currency: string
+  duration_days: number
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface CreatePlanRequest {
+  code: string
+  name: string
+  amount_in_cents: number
+  currency?: string
+  duration_days?: number
+  is_active?: boolean
+}
+
+export interface UpdatePlanRequest {
+  name?: string | null
+  amount_in_cents?: number | null
+  currency?: string | null
+  duration_days?: number | null
+  is_active?: boolean | null
+}
+
+export interface CheckoutResponse {
+  payment_id: string
+  reference: string
+  amount_in_cents: number
+  currency: string
+  public_key: string
+  signature_integrity: string
+  redirect_url: string
+}
+
+export interface PaymentResponse {
+  id: string
+  user_id: string
+  reference: string
+  amount_in_cents: number
+  currency: string
+  status: PaymentStatus
+  transaction_id: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface PaginatedPaymentsResponse {
+  items: PaymentResponse[]
+  page: number
+  page_size: number
+  total: number
+  total_pages: number
+}
+
 export interface DailyForecast {
   date: string
   temp_min: number
@@ -105,6 +197,7 @@ export interface WeatherForecast {
 }
 
 export interface PackingItem {
+  position?: number
   category: string
   item: string
   quantity?: string | null

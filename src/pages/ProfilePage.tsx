@@ -30,6 +30,7 @@ import { subscriptionsApi, usersApi } from "@/lib/endpoints"
 import { useToast } from "@/hooks/use-toast"
 import { apiErrorMessage } from "@/lib/api"
 import { formatDate } from "@/lib/utils"
+import { SubscriptionPlans } from "@/components/subscription/SubscriptionPlans"
 import type { SubscriptionType } from "@/types/api"
 
 const schema = z.object({
@@ -241,19 +242,33 @@ export function ProfilePage() {
             </Button>
           ) : (
             <Button
-              disabled={subscriptionMutation.isPending}
-              onClick={() => subscriptionMutation.mutate("PREMIUM")}
+              onClick={() =>
+                document
+                  .getElementById("subscription-plans")
+                  ?.scrollIntoView({ behavior: "smooth", block: "start" })
+              }
             >
-              {subscriptionMutation.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Crown className="h-4 w-4" />
-              )}
-              Cambiar a Premium
+              <Crown className="h-4 w-4" />
+              Ver planes Premium
             </Button>
           )}
         </CardFooter>
       </Card>
+
+      <section
+        id="subscription-plans"
+        className="animate-fade-up animate-delay-2 space-y-4 scroll-mt-24"
+      >
+        <div className="space-y-1">
+          <h2 className="text-xl font-semibold tracking-tight">
+            Planes disponibles
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Paga de forma segura con Wompi y activa Premium al instante.
+          </p>
+        </div>
+        <SubscriptionPlans />
+      </section>
 
       <Card className="animate-fade-up animate-delay-2">
         <CardHeader>

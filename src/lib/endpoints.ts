@@ -3,7 +3,9 @@ import type {
   AnswerQuestionsRequest,
   AnswerReplacementRequest,
   ChangeSubscriptionRequest,
+  CheckoutResponse,
   CreateExpenseRequest,
+  CreatePlanRequest,
   CreatePlanningRequest,
   CurrentQuestionsResponse,
   DestinationQuestionsResponse,
@@ -14,6 +16,10 @@ import type {
   ItinerarySummaryResponse,
   LoginRequest,
   PackingList,
+  PaginatedPaymentsResponse,
+  PaginatedUsersResponse,
+  PaymentResponse,
+  PlanResponse,
   PlanningResponse,
   PublicFeedResponse,
   QuestionTreeResponse,
@@ -21,7 +27,10 @@ import type {
   SubscriptionResponse,
   TokenResponse,
   UpdateExpenseRequest,
+  UpdatePlanRequest,
   UpdateUserRequest,
+  UpdateUserRoleRequest,
+  UserAdminResponse,
   UserResponse,
 } from "@/types/api"
 
@@ -47,6 +56,65 @@ export const subscriptionsApi = {
     api
       .post<SubscriptionResponse>("/api/v1/subscriptions/me", body)
       .then((r) => r.data),
+  plans: () =>
+    api
+      .get<PlanResponse[]>("/api/v1/subscriptions/plans")
+      .then((r) => r.data),
+}
+
+export const paymentsApi = {
+  checkout: () =>
+    api
+      .post<CheckoutResponse>("/api/v1/payments/checkout")
+      .then((r) => r.data),
+  get: (reference: string) =>
+    api
+      .get<PaymentResponse>(`/api/v1/payments/${reference}`)
+      .then((r) => r.data),
+}
+
+export const adminApi = {
+  plans: {
+    list: () =>
+      api.get<PlanResponse[]>("/api/v1/admin/plans").then((r) => r.data),
+    create: (body: CreatePlanRequest) =>
+      api
+        .post<PlanResponse>("/api/v1/admin/plans", body)
+        .then((r) => r.data),
+    update: (planId: string, body: UpdatePlanRequest) =>
+      api
+        .patch<PlanResponse>(`/api/v1/admin/plans/${planId}`, body)
+        .then((r) => r.data),
+    remove: (planId: string) =>
+      api.delete(`/api/v1/admin/plans/${planId}`).then((r) => r.data),
+  },
+  payments: {
+    list: (page = 1, pageSize = 20) =>
+      api
+        .get<PaginatedPaymentsResponse>("/api/v1/admin/payments", {
+          params: { page, page_size: pageSize },
+        })
+        .then((r) => r.data),
+    get: (reference: string) =>
+      api
+        .get<PaymentResponse>(`/api/v1/admin/payments/${reference}`)
+        .then((r) => r.data),
+  },
+  users: {
+    list: (page = 1, pageSize = 20) =>
+      api
+        .get<PaginatedUsersResponse>("/api/v1/admin/users", {
+          params: { page, page_size: pageSize },
+        })
+        .then((r) => r.data),
+    updateRole: (userId: string, body: UpdateUserRoleRequest) =>
+      api
+        .patch<UserAdminResponse>(
+          `/api/v1/admin/users/${userId}/role`,
+          body,
+        )
+        .then((r) => r.data),
+  },
 }
 
 export const planningApi = {

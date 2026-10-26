@@ -1,5 +1,5 @@
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom"
-import { Compass, LogOut, Map, Plus, User } from "lucide-react"
+import { Compass, LayoutDashboard, LogOut, Map, Plus, User } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,6 +14,8 @@ import { cn } from "@/lib/utils"
 export function AppLayout() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+
+  const isAdmin = user?.role === "ADMIN"
 
   const initials = user?.full_name
     ?.split(" ")
@@ -79,6 +81,12 @@ export function AppLayout() {
               <Plus className="h-4 w-4" />,
               "Nueva planificación",
             )}
+            {isAdmin &&
+              navItem(
+                "/admin",
+                <LayoutDashboard className="h-4 w-4" />,
+                "Administración",
+              )}
           </nav>
 
           <DropdownMenu>
@@ -110,6 +118,12 @@ export function AppLayout() {
                 <Plus className="h-4 w-4" />
                 Nueva planificación
               </DropdownMenuItem>
+              {isAdmin && (
+                <DropdownMenuItem onClick={() => navigate("/admin")}>
+                  <LayoutDashboard className="h-4 w-4" />
+                  Panel de Administración
+                </DropdownMenuItem>
+              )}
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 className="text-destructive focus:bg-destructive/10 focus:text-destructive"
@@ -128,6 +142,12 @@ export function AppLayout() {
           {mobileNavItem("/", <Map className="h-4 w-4" />, "Itinerarios")}
           {mobileNavItem("/planning/new", <Plus className="h-4 w-4" />, "Nuevo")}
           {mobileNavItem("/profile", <User className="h-4 w-4" />, "Perfil")}
+          {isAdmin &&
+            mobileNavItem(
+              "/admin",
+              <LayoutDashboard className="h-4 w-4" />,
+              "Admin",
+            )}
         </div>
       </header>
 
