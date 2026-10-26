@@ -1,7 +1,7 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios"
 import type { TokenResponse } from "@/types/api"
 
-const BASE_URL = "https://traveliaapp-bzaaabhuc8g2ech5.mexicocentral-01.azurewebsites.net"
+const BASE_URL = "https://travelia-bkbwcxa2d0fwaee5.mexicocentral-01.azurewebsites.net/"
 
 const ACCESS_KEY = "travelia.access_token"
 const REFRESH_KEY = "travelia.refresh_token"
